@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In — Startup Idea Validator AI{% endblock %}
+
+{% block auth_content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5 col-xl-4">
+      <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-3 p-3 shadow-lg mb-3">
+          <i class="bi bi-rocket-takeoff-fill fs-2"></i>
+        </div>
+        <h2 class="fw-bold text-navy mb-1">Validator AI</h2>
+        <p class="text-muted small">Autonomous Market Validation & Competitive Intelligence</p>
+      </div>
+
+      <div class="card-custom shadow-lg border-0">
+        <div class="card-custom-body p-4 p-sm-5">
+          <h4 class="fw-bold mb-3">Sign In to Dashboard</h4>
+          <p class="text-muted small mb-4">Enter your credentials to manage your startup validations.</p>
+
+          <form method="POST" action="{{ url_for('login') }}">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted">Email Address</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                <input type="email" name="email" class="form-control border-start-0" placeholder="founder@startup.com" required autofocus value="demo@startupvalidator.com">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted">Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                <input type="password" name="password" class="form-control border-start-0" placeholder="••••••••" required value="password123">
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remember" id="rememberMe" checked>
+                <label class="form-check-label small text-muted" for="rememberMe">Remember me</label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">
+              <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+            </button>
+          </form>
+
+          <div class="position-relative text-center my-3">
+            <hr class="text-muted">
+            <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted">or</span>
+          </div>
+
+          <!-- 1-Click Demo Login for quick testing -->
+          <a href="{{ url_for('demo_login') }}" class="btn btn-outline-primary w-100 py-2 mb-3">
+            <i class="bi bi-lightning-charge-fill text-warning me-2"></i> Instant Demo Login (1-Click)
+          </a>
+
+          <div class="text-center mt-4">
+            <span class="small text-muted">Don't have an account? </span>
+            <a href="{{ url_for('register') }}" class="small fw-bold text-primary text-decoration-none">Create Free Account</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}MVP Feature Recommendations — {{ idea.title }}{% endblock %}
+
+{% block content %}
+{% include 'partials/idea_header.html' %}
+
+<!-- MVP Milestone Summary -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Recommended MVP Timeline</div>
+      <div class="fs-2 fw-extrabold text-primary">{{ mvp.estimated_mvp_weeks or 6 }} Weeks</div>
+      <div class="text-muted small">Agile launch sprint to alpha</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Essential Must-Have Features</div>
+      <div class="fs-2 fw-extrabold text-success">{{ mvp.must_have|length if mvp.must_have else 3 }}</div>
+      <div class="text-muted small">Strictly scoped core value loop</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Target Validation Metric</div>
+      <div class="fs-6 fw-bold text-navy mt-1">{{ mvp.first_milestone_metric or '30 active weekly users' }}</div>
+      <div class="text-muted small">Initial product-market fit signal</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 6-WEEK MVP DEVELOPMENT ROADMAP TIMELINE ================= -->
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <div>
+      <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-range-fill text-primary me-2"></i> 6-Week Agile Development Roadmap</h5>
+      <span class="small text-muted">Weekly sprint milestones from prototype architecture to public beta launch</span>
+    </div>
+    <span class="badge bg-primary-subtle text-primary border">Sprint Roadmap</span>
+  </div>
+  <div class="card-custom-body p-4">
+    <div class="row g-3">
+      {% for ms in mvp.weekly_milestones or [
+        {'week': 'Week 1', 'phase': 'Architecture & Foundation', 'focus': 'Database schema, authentication & design system', 'deliverables': ['User auth & session handling', 'SQLite/Postgres models', 'UI layouts'], 'status': 'Completed', 'progress_pct': 100},
+        {'week': 'Week 2', 'phase': 'Core Workflow Engine', 'focus': 'Primary value-generating algorithm and API integration', 'deliverables': ['Core execution loop', 'API integration', 'Input validation'], 'status': 'In Progress', 'progress_pct': 60},
+        {'week': 'Week 3', 'phase': 'User Onboarding & Dashboard', 'focus': 'Self-serve onboarding flow and analytics visualization', 'deliverables': ['Step-by-step onboarding', 'Metrics dashboard', 'Settings panel'], 'status': 'Planned', 'progress_pct': 25},
+        {'week': 'Week 4', 'phase': 'Export & Reporting', 'focus': 'Downloadable reports, sharing and webhooks', 'deliverables': ['PDF executive exports', 'CSV data download', 'Email reports'], 'status': 'Planned', 'progress_pct': 0},
+        {'week': 'Week 5', 'phase': 'Alpha Testing & Tuning', 'focus': 'Private testing with 10 beta ICP founders & performance tuning', 'deliverables': ['Bug fixes', 'User feedback adjustments', 'Latency optimization'], 'status': 'Planned', 'progress_pct': 0},
+        {'week': 'Week 6', 'phase': 'Public MVP Launch', 'focus': 'Self-serve paywall, Product Hunt launch & community outreach', 'deliverables': ['Billing integration', 'Product Hunt launch kit', 'Cold outreach pipeline'], 'status': 'Planned', 'progress_pct': 0}
+      ] %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border rounded-3 p-3 shadow-none bg-light-subtle">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-navy text-white px-2 py-1 fw-bold">{{ ms.week }}</span>
+            <span class="badge {% if ms.status == 'Completed' %}bg-success-subtle text-success border border-success-subtle{% elif ms.status == 'In Progress' %}bg-primary-subtle text-primary border border-primary-subtle{% else %}bg-secondary-subtle text-secondary border{% endif %}">
+              {{ ms.status }}
+            </span>
+          </div>
+          <h6 class="fw-bold text-navy mb-1">{{ ms.phase }}</h6>
+          <p class="small text-muted mb-2">{{ ms.focus }}</p>
+          
+          <div class="mb-3">
+            <div class="d-flex flex-wrap gap-1">
+              {% for d in ms.deliverables %}
+                <span class="badge bg-white text-dark border small" style="font-size: 0.72rem;">{{ d }}</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="mt-auto pt-2 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-1 small">
+              <span class="text-muted fs-8">Milestone Progress</span>
+              <span class="fw-bold fs-8 text-navy">{{ ms.progress_pct }}%</span>
+            </div>
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar {% if ms.progress_pct == 100 %}bg-success{% elif ms.progress_pct > 0 %}bg-primary{% else %}bg-secondary{% endif %}" role="progressbar" style="width: {{ ms.progress_pct }}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- MoSCoW Kanban Grid -->
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-kanban-fill text-primary me-2"></i> MoSCoW Feature Prioritization Framework</h5>
+    <span class="badge bg-light text-muted border">Sprint Scope</span>
+  </div>
+  <div class="card-custom-body p-3">
+    <div class="moscow-grid">
+      <!-- MUST HAVE -->
+      <div class="moscow-col">
+        <div class="moscow-col-header moscow-must">
+          <span><i class="bi bi-check-circle-fill me-1"></i> MUST-HAVE</span>
+          <span class="badge bg-success-subtle text-success border border-success-subtle">Day 1 Core</span>
+        </div>
+        {% for item in mvp.must_have or ['Core automated processing pipeline', 'User registration and workspace', '1-Click PDF/data report export'] %}
+          <div class="feature-pill border-start border-success border-3">
+            <div class="fw-semibold">{{ item }}</div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- SHOULD HAVE -->
+      <div class="moscow-col">
+        <div class="moscow-col-header moscow-should">
+          <span><i class="bi bi-star-fill me-1"></i> SHOULD-HAVE</span>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Phase 2</span>
+        </div>
+        {% for item in mvp.should_have or ['Automated recurring billing integration', 'Team member invitation and roles', 'Email summary digests'] %}
+          <div class="feature-pill border-start border-primary border-3">
+            <div class="fw-semibold">{{ item }}</div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- COULD HAVE -->
+      <div class="moscow-col">
+        <div class="moscow-col-header moscow-could">
+          <span><i class="bi bi-bookmark-plus-fill me-1"></i> COULD-HAVE</span>
+          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Nice-to-Have</span>
+        </div>
+        {% for item in mvp.could_have or ['Zapier/Make automation webhooks', 'Multi-language localization', 'Custom dashboard themes'] %}
+          <div class="feature-pill border-start border-warning border-3">
+            <div class="fw-semibold">{{ item }}</div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- WON'T HAVE -->
+      <div class="moscow-col">
+        <div class="moscow-col-header moscow-wont">
+          <span><i class="bi bi-x-circle-fill me-1"></i> WON'T-HAVE</span>
+          <span class="badge bg-secondary-subtle text-secondary border">Out of Scope</span>
+        </div>
+        {% for item in mvp.wont_have or ['Custom enterprise on-premise installation', 'Native mobile application for v1', 'Complex multi-level procurement workflows'] %}
+          <div class="feature-pill border-start border-secondary border-3 text-muted">
+            <div>{{ item }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Effort vs Impact Matrix & Tech Stack -->
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i> Effort vs. Impact Analysis</h5>
+        <span class="badge bg-light text-muted border">ROI Matrix</span>
+      </div>
+      <div class="card-custom-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Feature Description</th>
+                <th>Impact</th>
+                <th>Effort</th>
+                <th class="pe-4">Quadrant Classification</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for feat in mvp.effort_vs_impact or [] %}
+                <tr>
+                  <td class="ps-4 fw-semibold text-navy small">{{ feat.feature }}</td>
+                  <td>
+                    <span class="badge {% if feat.impact == 'High' %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                      {{ feat.impact }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge {% if feat.effort == 'High' %}bg-danger-subtle text-danger{% else %}bg-light text-dark border{% endif %}">
+                      {{ feat.effort }}
+                    </span>
+                  </td>
+                  <td class="pe-4">
+                    <span class="badge {% if feat.quadrant == 'Quick Win' %}bg-success text-white{% elif feat.quadrant == 'Major Project' %}bg-primary text-white{% elif feat.quadrant == 'Fill-In' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %}">
+                      {{ feat.quadrant }}
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-cpu-fill text-info me-2"></i> Recommended Tech Stack</h5>
+        <span class="badge bg-light text-muted border">Architecture</span>
+      </div>
+      <div class="card-custom-body">
+        <div class="list-group list-group-flush">
+          {% for layer in mvp.recommended_tech_stack or [
+            {'layer': 'Frontend Interface', 'tech': 'Bootstrap 5 + Modern JavaScript & Chart.js'},
+            {'layer': 'Backend Microservices', 'tech': 'Python / Flask with REST endpoints'},
+            {'layer': 'Database & Persistence', 'tech': 'SQLite / PostgreSQL'},
+            {'layer': 'AI Reasoning Engine', 'tech': 'Groq Llama 3.3 Versatile & Tavily Search'}
+          ] %}
+            <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <span class="text-muted fs-7 d-block text-uppercase fw-bold">{{ layer.layer }}</span>
+                <span class="fw-bold text-navy">{{ layer.tech }}</span>
+              </div>
+              <i class="bi bi-check2-circle text-primary fs-5"></i>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

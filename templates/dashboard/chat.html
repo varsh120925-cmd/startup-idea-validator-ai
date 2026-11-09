@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}AI Startup Advisor Chatbot — {{ idea.title }}{% endblock %}
+
+{% block content %}
+{% include 'partials/idea_header.html' %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-11 col-xl-10">
+    <div class="card-custom">
+      <div class="card-custom-header d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="mb-0 fw-bold">
+            <i class="bi bi-robot text-primary me-2"></i> AI Startup Advisor Copilot
+          </h5>
+          <span class="text-muted fs-7">Trained on your idea's market size, competitors, SWOT, risks, and MVP scope.</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <!-- Switch Idea Dropdown -->
+          {% if all_ideas|length > 1 %}
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Switch Idea: <span class="fw-bold">{{ idea.title[:18] }}...</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                {% for i in all_ideas %}
+                  <li>
+                    <a class="dropdown-item {% if i.id == idea.id %}active{% endif %}" href="{{ url_for('view_chat', idea_id=i.id) }}">
+                      {{ i.title }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          <button type="button" class="btn btn-sm btn-outline-danger" id="clearChatBtn" title="Clear Chat History">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="card-custom-body p-4">
+        <!-- Quick Action Prompt Chips -->
+        <div class="mb-3">
+          <span class="fs-7 fw-bold text-muted d-block mb-2">
+            <i class="bi bi-lightning-fill text-warning me-1"></i> Quick Founder Prompts:
+          </span>
+          <div class="prompt-chips">
+            <button class="prompt-chip" data-prompt="How do I acquire my first 100 paying customers for this startup?">
+              🎯 First 100 Customers
+            </button>
+            <button class="prompt-chip" data-prompt="What is the ideal pricing strategy and should I offer a free tier?">
+              💡 Pricing Psychology
+            </button>
+            <button class="prompt-chip" data-prompt="How do I build a defensible moat against incumbent competitors?">
+              🛡️ Defensibility & Moat
+            </button>
+            <button class="prompt-chip" data-prompt="What are the biggest critical risks and red flags I must solve first?">
+              ⚠️ Critical Red Flags
+            </button>
+            <button class="prompt-chip" data-prompt="Draft a crisp 60-second elevator pitch for angel investors.">
+              🚀 60-Sec Pitch Script
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Messages Container -->
+        <div class="chat-container">
+          <div class="chat-messages" id="chatMessages">
+            <!-- Initial Advisor Welcome Message -->
+            <div class="chat-bubble assistant">
+              <div>
+                <strong>Hello Founder!</strong> I am your AI Startup Advisor. I have analyzed <strong>{{ idea.title }}</strong> across its <strong>{{ idea.industry }}</strong> market dynamics, verified competitors, SWOT factors, and MVP scope.
+                <br/><br/>
+                What strategic challenge would you like to tackle today? You can ask about customer acquisition, pricing tiers, pitch scripts, or risk mitigations!
+              </div>
+              <div class="text-muted mt-2 pt-1 border-top" style="font-size: 0.72rem;">
+                <i class="bi bi-shield-check text-primary"></i> Context-Aware Multi-Agent Advisor
+              </div>
+            </div>
+
+            <!-- Stored History -->
+            {% for msg in chat_history %}
+              <div class="chat-bubble {{ msg.role }}">
+                <div>{{ msg.message|safe }}</div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="mt-3">
+            <div class="input-group">
+              <input type="text" id="chatInput" class="form-control py-2" placeholder="Ask your AI Startup Advisor anything about your business model..." autofocus>
+              <button class="btn btn-primary-custom px-4" id="sendBtn" type="button">
+                <i class="bi bi-send-fill me-1"></i> Send
+              </button>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+              <span class="text-muted fs-7">Press Enter to send. Powered by Groq LLM & Multi-Agent Context.</span>
+              <span class="text-muted fs-7"><i class="bi bi-lock-fill me-1"></i> Idea context encrypted & isolated</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    initAdvisorChat({{ idea.id }});
+});
+</script>
+{% endblock %}

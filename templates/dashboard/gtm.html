@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Go-to-Market Strategy — {{ idea.title }}{% endblock %}
+
+{% block content %}
+{% include 'partials/idea_header.html' %}
+
+<!-- Strategic Positioning Statement Hero Card -->
+<div class="card-custom mb-4 bg-primary text-white border-0 shadow-md" style="background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%) !important;">
+  <div class="card-custom-body p-4">
+    <div class="d-flex align-items-center gap-2 mb-2 text-info small fw-bold text-uppercase">
+      <i class="bi bi-award-fill"></i> Core Value Proposition & Positioning Statement
+    </div>
+    <h5 class="fw-normal lh-base mb-0 text-white">
+      "{{ gtm.positioning_statement or 'For growing business teams, our platform delivers 10x faster automated intelligence with zero manual overhead.' }}"
+    </h5>
+  </div>
+</div>
+
+<!-- ICP and Acquisition Channels -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-5">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-person-bounding-box text-primary me-2"></i> Ideal Customer Profile (ICP)</h5>
+        <span class="badge bg-light text-muted border">Buyer Persona</span>
+      </div>
+      <div class="card-custom-body">
+        {% set icp = gtm.ideal_customer_profile or {} %}
+        <div class="mb-3">
+          <span class="text-muted fs-7 d-block text-uppercase fw-semibold">Target Company / User Type</span>
+          <span class="fw-bold text-navy">{{ icp.company_type or 'Agile SMBs and boutique digital operators' }}</span>
+        </div>
+        <div class="mb-3">
+          <span class="text-muted fs-7 d-block text-uppercase fw-semibold">Team Size & Scale</span>
+          <span class="fw-bold text-navy">{{ icp.team_size or '2 - 50 team members' }}</span>
+        </div>
+        <div class="mb-3">
+          <span class="text-muted fs-7 d-block text-uppercase fw-semibold">Primary Buying Trigger Event</span>
+          <span class="fw-bold text-navy">{{ icp.key_trigger_event or 'Hitting an operational bottleneck where manual processes cost time' }}</span>
+        </div>
+        <div>
+          <span class="text-muted fs-7 d-block text-uppercase fw-semibold">Economic Decision Maker</span>
+          <span class="fw-bold text-primary">{{ icp.primary_decision_maker or 'Founder, COO, or Department Lead' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-megaphone-fill text-primary me-2"></i> Customer Acquisition Channels</h5>
+        <span class="badge bg-light text-muted border">Funnels</span>
+      </div>
+      <div class="card-custom-body">
+        <div class="list-group list-group-flush">
+          {% for ch in gtm.acquisition_channels or [] %}
+            <div class="list-group-item px-0 py-3 d-flex align-items-start gap-3">
+              <span class="badge bg-primary-subtle text-primary rounded-circle p-2 mt-1">
+                <i class="bi bi-check2 fs-6"></i>
+              </span>
+              <div>
+                <span class="fw-semibold text-navy">{{ ch }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pricing Strategy & Tiers -->
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-tag-fill text-primary me-2"></i> Pricing Architecture & Monetization</h5>
+    <span class="badge bg-success-subtle text-success border border-success-subtle">
+      Target Year 1: {{ gtm.first_year_target_arr or '$120,000 ARR' }}
+    </span>
+  </div>
+  <div class="card-custom-body">
+    {% set pricing = gtm.pricing_strategy or {} %}
+    <p class="text-muted small mb-4"><strong>Model:</strong> {{ pricing.model_name or 'Tiered SaaS Subscription' }} — {{ pricing.rationale }}</p>
+    
+    <div class="row g-3">
+      {% for tier in pricing.tiers or [
+        {'name': 'Starter', 'price': '$29/mo', 'target': 'Individual operators', 'features': 'Core workflows and exports'},
+        {'name': 'Pro / Growth', 'price': '$79/mo', 'target': 'Boutique teams (Most Popular)', 'features': 'Unlimited automation & 3 team seats'},
+        {'name': 'Enterprise', 'price': '$249/mo+', 'target': 'Companies & Agencies', 'features': 'Custom API access, priority SLA, 10 team seats'}
+      ] %}
+        <div class="col-md-4">
+          <div class="border rounded-3 p-3 text-center h-100 {% if 'Popular' in tier.target %}border-primary shadow-sm bg-light-subtle{% else %}bg-white{% endif %}">
+            {% if 'Popular' in tier.target %}
+              <span class="badge bg-primary mb-2">Recommended Anchor</span>
+            {% endif %}
+            <h6 class="fw-bold mb-1">{{ tier.name }}</h6>
+            <div class="fs-2 fw-extrabold text-navy my-2">{{ tier.price }}</div>
+            <div class="text-muted small mb-3">{{ tier.target }}</div>
+            <div class="p-2 bg-light rounded text-dark small">{{ tier.features }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- 90-Day Launch Roadmap -->
+<div class="card-custom">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-check-fill text-primary me-2"></i> 90-Day Tactical Launch Roadmap</h5>
+    <span class="badge bg-light text-muted border">Execution Milestones</span>
+  </div>
+  <div class="card-custom-body">
+    <div class="row g-4">
+      {% for phase in gtm.launch_roadmap_90_days or [] %}
+        <div class="col-md-4">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <h6 class="fw-bold text-primary mb-3"><i class="bi bi-flag-fill me-2"></i> {{ phase.phase }}</h6>
+            <ul class="list-unstyled mb-0 small">
+              {% for m in phase.milestones %}
+                <li class="mb-2 d-flex align-items-start gap-2">
+                  <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                  <span>{{ m }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account — Startup Idea Validator AI{% endblock %}
+
+{% block auth_content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5 col-xl-4">
+      <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-3 p-3 shadow-lg mb-3">
+          <i class="bi bi-rocket-takeoff-fill fs-2"></i>
+        </div>
+        <h2 class="fw-bold text-navy mb-1">Join Validator AI</h2>
+        <p class="text-muted small">Begin autonomous validation of your startup ideas today</p>
+      </div>
+
+      <div class="card-custom shadow-lg border-0">
+        <div class="card-custom-body p-4 p-sm-5">
+          <h4 class="fw-bold mb-3">Register Founder Account</h4>
+          <p class="text-muted small mb-4">Get instant access to all 8 AI validation agents.</p>
+
+          <form method="POST" action="{{ url_for('register') }}">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted">Full Name</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                <input type="text" name="full_name" class="form-control border-start-0" placeholder="e.g. Sarah Jenkins" required autofocus>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted">Username</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-at"></i></span>
+                <input type="text" name="username" class="form-control border-start-0" placeholder="sarahfounder" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted">Email Address</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                <input type="email" name="email" class="form-control border-start-0" placeholder="sarah@venture.com" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted">Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                <input type="password" name="password" class="form-control border-start-0" placeholder="Minimum 6 characters" required>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-semibold text-muted">Confirm Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-shield-check"></i></span>
+                <input type="password" name="confirm_password" class="form-control border-start-0" placeholder="Re-enter password" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">
+              <i class="bi bi-person-check-fill me-2"></i> Create Account
+            </button>
+          </form>
+
+          <div class="text-center mt-3">
+            <span class="small text-muted">Already registered? </span>
+            <a href="{{ url_for('login') }}" class="small fw-bold text-primary text-decoration-none">Sign In</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

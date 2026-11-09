@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Market Opportunity Analysis — {{ idea.title }}{% endblock %}
+
+{% block content %}
+{% include 'partials/idea_header.html' %}
+
+<!-- Market Sizing Summary Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Total Addressable Market (TAM)</div>
+      <div class="fs-2 fw-extrabold text-navy">{{ market.tam or '$14.2 Billion' }}</div>
+      <div class="text-muted small">Global category expenditure</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Serviceable Addressable (SAM)</div>
+      <div class="fs-2 fw-extrabold text-primary">{{ market.sam or '$3.1 Billion' }}</div>
+      <div class="text-muted small">Target geography & segment</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Serviceable Obtainable (SOM)</div>
+      <div class="fs-2 fw-extrabold text-success">{{ market.som or '$180 Million' }}</div>
+      <div class="text-muted small">Realistic 3-year market share</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Projected Growth (CAGR)</div>
+      <div class="fs-2 fw-extrabold text-info">{{ market.cagr or '15.8%' }}</div>
+      <div class="text-muted small">Annual expansion rate</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Visual TAM/SAM/SOM Nested Bars -->
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-layers-half text-primary me-2"></i> Market Tier Hierarchy</h5>
+        <span class="badge bg-light text-muted border">Market Sizing</span>
+      </div>
+      <div class="card-custom-body">
+        <div class="market-tier-container">
+          <div class="market-tier-bar market-tier-tam">
+            <div>
+              <div class="small text-white-50">TAM (Total Market)</div>
+              <div class="fw-bold fs-5">{{ market.tam or '$14.2B' }}</div>
+            </div>
+            <span class="badge bg-white text-dark">100% Macro Reach</span>
+          </div>
+
+          <div class="market-tier-bar market-tier-sam">
+            <div>
+              <div class="small text-white-50">SAM (Serviceable Reach)</div>
+              <div class="fw-bold fs-5">{{ market.sam or '$3.1B' }}</div>
+            </div>
+            <span class="badge bg-white text-dark">Target Core ICP</span>
+          </div>
+
+          <div class="market-tier-bar market-tier-som">
+            <div>
+              <div class="small text-white-50">SOM (3-Year Capture)</div>
+              <div class="fw-bold fs-5">{{ market.som or '$180M' }}</div>
+            </div>
+            <span class="badge bg-white text-dark">Initial Traction Wedge</span>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top">
+          <h6 class="fw-bold text-navy mb-2"><i class="bi bi-fuel-pump text-primary me-2"></i> Key Market Drivers:</h6>
+          <ul class="list-unstyled mb-0">
+            {% for driver in market.market_drivers or ['Rapid adoption of automated workflows', 'Increasing willingness to pay for vertical solutions', 'Discontent with bloated legacy enterprise tools'] %}
+              <li class="mb-2 small d-flex align-items-start gap-2">
+                <i class="bi bi-arrow-right-circle-fill text-primary mt-1"></i>
+                <span>{{ driver }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Industry Trends -->
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-graph-up text-primary me-2"></i> Macro Industry Trends</h5>
+        <span class="badge bg-light text-muted border">2025–2027 Outlook</span>
+      </div>
+      <div class="card-custom-body">
+        {% for item in market.industry_trends or [] %}
+          <div class="p-3 mb-3 bg-light rounded-3 border">
+            <div class="fw-bold text-navy mb-1"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> {{ item.trend }}</div>
+            <p class="text-muted small mb-0">{{ item.impact }}</p>
+          </div>
+        {% else %}
+          <div class="p-3 mb-2 bg-light rounded-3 border">
+            <div class="fw-bold text-navy mb-1">AI-Native Specialization Over Generic Tools</div>
+            <p class="text-muted small mb-0">Customers are abandoning broad AI tools for purpose-built workflows tailored precisely to their industry compliance.</p>
+          </div>
+          <div class="p-3 mb-2 bg-light rounded-3 border">
+            <div class="fw-bold text-navy mb-1">Self-Serve Frictionless Time-to-Value</div>
+            <p class="text-muted small mb-0">Modern buyers reject multi-week onboarding cycles; they expect measurable ROI within the first 10 minutes.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Segmentation Personas -->
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-people-fill text-primary me-2"></i> Target Customer Segmentation & Personas</h5>
+    <span class="badge bg-light text-muted border">ICP Breakdown</span>
+  </div>
+  <div class="card-custom-body">
+    <div class="row g-3">
+      {% for seg in market.customer_segments or [] %}
+        <div class="col-md-6">
+          <div class="border rounded-3 p-3 h-100 bg-white shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="fw-bold text-primary mb-0">{{ seg.segment_name }}</h6>
+              <span class="badge bg-success-subtle text-success border border-success-subtle small">
+                {{ seg.willingness_to_pay or 'High WTP' }}
+              </span>
+            </div>
+            <p class="text-dark small mb-2"><strong>Persona:</strong> {{ seg.persona }}</p>
+            <div class="p-2 bg-light rounded mb-2 small">
+              <strong class="text-danger"><i class="bi bi-exclamation-circle me-1"></i> Primary Pain Point:</strong><br/>
+              {{ seg.pain_point }}
+            </div>
+            <div class="small text-muted">
+              <strong>Acquisition Channel:</strong> {{ seg.acquisition_channel }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Verified Research Sources -->
+<div class="card-custom">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-search text-primary me-2"></i> Market Intelligence & Reference Citations</h5>
+    <span class="badge bg-light text-muted border">Source Verification</span>
+  </div>
+  <div class="card-custom-body">
+    <p class="text-muted small mb-3">
+      The following research benchmarks and industry telemetry were incorporated into this market evaluation:
+    </p>
+    <div class="list-group list-group-flush">
+      {% for src in market.research_sources or [] %}
+        <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-semibold text-navy">{{ src.title }}</div>
+            <div class="text-muted fs-7 text-truncate" style="max-width: 650px;">{{ src.snippet }}</div>
+          </div>
+          <div class="text-end">
+            {% if src.is_verified %}
+              <span class="badge-verified"><i class="bi bi-check-circle-fill"></i> Live Web Search</span>
+            {% else %}
+              <span class="badge-simulated"><i class="bi bi-cpu"></i> Market Telemetry</span>
+            {% endif %}
+            {% if src.url %}
+              <a href="{{ src.url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary ms-2 py-0 px-2" style="font-size: 0.75rem;">
+                Visit <i class="bi bi-box-arrow-up-right"></i>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if idea.status == 'analyzing' or request.args.get('validated') == 'started' %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    startPipelinePoller({{ idea.id }}, "{{ url_for('view_market', idea_id=idea.id) }}");
+});
+</script>
+{% endif %}
+{% endblock %}

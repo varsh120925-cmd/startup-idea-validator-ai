@@ -1,0 +1,120 @@
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">
+      <i class="bi bi-rocket-takeoff-fill"></i>
+    </div>
+    <div class="sidebar-brand-text">
+      Validator AI
+      <span>Market Intelligence</span>
+    </div>
+  </div>
+
+  <div class="sidebar-heading">Navigation</div>
+  <ul class="sidebar-nav">
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+        <i class="bi bi-grid-1x2-fill"></i>
+        <span>Dashboard</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'submit_idea' %}active{% endif %}" href="{{ url_for('submit_idea') }}">
+        <i class="bi bi-plus-circle-fill"></i>
+        <span>Submit Idea</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'view_history' %}active{% endif %}" href="{{ url_for('view_history') }}">
+        <i class="bi bi-clock-history"></i>
+        <span>Validation History</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint in ['general_advisor', 'view_chat'] %}active{% endif %}" href="{{ url_for('general_advisor') }}">
+        <i class="bi bi-chat-square-dots-fill"></i>
+        <span>AI Startup Advisor</span>
+      </a>
+    </li>
+
+    <div class="sidebar-heading">Validation Framework</div>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'view_market' %}active{% endif %}" 
+         href="{% if idea %}{{ url_for('view_market', idea_id=idea.id) }}{% else %}#{% endif %}"
+         {% if not idea %}data-bs-toggle="tooltip" title="Select or submit an idea first"{% endif %}>
+        <i class="bi bi-pie-chart-fill"></i>
+        <span>Market Opportunity</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'view_competitors' %}active{% endif %}" 
+         href="{% if idea %}{{ url_for('view_competitors', idea_id=idea.id) }}{% else %}#{% endif %}"
+         {% if not idea %}data-bs-toggle="tooltip" title="Select or submit an idea first"{% endif %}>
+        <i class="bi bi-binoculars-fill"></i>
+        <span>Competitor Matrix</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'view_swot' %}active{% endif %}" 
+         href="{% if idea %}{{ url_for('view_swot', idea_id=idea.id) }}{% else %}#{% endif %}"
+         {% if not idea %}data-bs-toggle="tooltip" title="Select or submit an idea first"{% endif %}>
+        <i class="bi bi-shield-shaded"></i>
+        <span>SWOT Analysis</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'view_risks' %}active{% endif %}" 
+         href="{% if idea %}{{ url_for('view_risks', idea_id=idea.id) }}{% else %}#{% endif %}"
+         {% if not idea %}data-bs-toggle="tooltip" title="Select or submit an idea first"{% endif %}>
+        <i class="bi bi-exclamation-octagon-fill"></i>
+        <span>Risk Assessment</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'view_mvp' %}active{% endif %}" 
+         href="{% if idea %}{{ url_for('view_mvp', idea_id=idea.id) }}{% else %}#{% endif %}"
+         {% if not idea %}data-bs-toggle="tooltip" title="Select or submit an idea first"{% endif %}>
+        <i class="bi bi-layers-fill"></i>
+        <span>MVP Roadmap</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'view_gtm' %}active{% endif %}" 
+         href="{% if idea %}{{ url_for('view_gtm', idea_id=idea.id) }}{% else %}#{% endif %}"
+         {% if not idea %}data-bs-toggle="tooltip" title="Select or submit an idea first"{% endif %}>
+        <i class="bi bi-graph-up-arrow"></i>
+        <span>Go-to-Market</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'view_report' %}active{% endif %}" 
+         href="{% if idea %}{{ url_for('view_report', idea_id=idea.id) }}{% else %}#{% endif %}"
+         {% if not idea %}data-bs-toggle="tooltip" title="Select or submit an idea first"{% endif %}>
+        <i class="bi bi-file-earmark-pdf-fill"></i>
+        <span>Executive Report</span>
+      </a>
+    </li>
+
+    <div class="sidebar-heading">System & Config</div>
+    <li class="nav-item">
+      <a class="nav-link {% if request.endpoint == 'view_settings' %}active{% endif %}" href="{{ url_for('view_settings') }}">
+        <i class="bi bi-sliders"></i>
+        <span>Settings & APIs</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <div class="user-profile-widget">
+      <div class="user-avatar">
+        {{ current_user.full_name[0] if current_user.full_name else 'F' }}
+      </div>
+      <div class="flex-grow-1 overflow-hidden">
+        <div class="text-white fw-semibold text-truncate fs-7">{{ current_user.full_name or current_user.username }}</div>
+        <div class="text-light text-truncate" style="font-size: 0.72rem;">{{ current_user.email }}</div>
+      </div>
+      <a href="{{ url_for('logout') }}" class="text-muted hover-white text-decoration-none" title="Sign Out">
+        <i class="bi bi-box-arrow-right fs-5"></i>
+      </a>
+    </div>
+  </div>
+</aside>

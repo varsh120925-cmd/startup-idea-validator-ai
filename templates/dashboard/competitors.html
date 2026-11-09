@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Competitor Analysis — {{ idea.title }}{% endblock %}
+
+{% block content %}
+{% include 'partials/idea_header.html' %}
+
+<!-- Overview Banner -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Cataloged Competitors</div>
+      <div class="fs-2 fw-extrabold text-navy">{{ competitors|length }}</div>
+      <div class="text-muted small">Direct, indirect & alternatives</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Defensibility Moat</div>
+      <div class="fs-2 fw-extrabold text-primary">{{ comp_data.defensibility_score or 76 }}/100</div>
+      <div class="text-muted small">Proprietary workflow stickiness</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Market Saturation</div>
+      <div class="fs-2 fw-extrabold text-warning">{{ comp_data.market_saturation or 'Moderate' }}</div>
+      <div class="text-muted small">Wedge opportunity identified</div>
+    </div>
+  </div>
+</div>
+
+<!-- Strategic Positioning Recommendation -->
+{% if comp_data.positioning_recommendation %}
+<div class="alert alert-primary border-primary d-flex align-items-center mb-4 p-3 shadow-sm" role="alert">
+  <i class="bi bi-crosshair fs-3 me-3 text-primary"></i>
+  <div>
+    <h6 class="fw-bold mb-1">Strategic Positioning Guidance</h6>
+    <div class="small">{{ comp_data.positioning_recommendation }}</div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Competitor Matrix Table -->
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <div>
+      <h5 class="mb-0 fw-bold"><i class="bi bi-table text-primary me-2"></i> Side-by-Side Competitor Comparison Matrix</h5>
+      <span class="small text-muted">Direct comparison of pricing, features, weaknesses, and differentiation opportunities</span>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('export_csv', idea_id=idea.id) }}" class="btn btn-sm btn-outline-success">
+        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+      </a>
+      <a href="{{ url_for('export_pdf', idea_id=idea.id) }}" class="btn btn-sm btn-outline-danger">
+        <i class="bi bi-file-earmark-pdf me-1"></i> PDF Report
+      </a>
+    </div>
+  </div>
+  <div class="card-custom-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Competitor</th>
+            <th>Type</th>
+            <th>Pricing</th>
+            <th>Main Features</th>
+            <th>Strengths</th>
+            <th>Weaknesses / Gripes</th>
+            <th>Differentiation / Moat</th>
+            <th class="pe-4 text-end">Research Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comp in competitors %}
+            <tr>
+              <td class="ps-4">
+                <div class="fw-bold text-navy">{{ comp.name }}</div>
+                {% if comp.website_url %}
+                  <a href="{{ comp.website_url }}" target="_blank" rel="noopener" class="text-muted fs-7 text-decoration-none">
+                    {{ comp.website_url[:28] }}{% if comp.website_url|length > 28 %}...{% endif %} <i class="bi bi-box-arrow-up-right" style="font-size: 0.65rem;"></i>
+                  </a>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge {% if comp.competitor_type == 'Direct' %}bg-primary-subtle text-primary border border-primary-subtle{% elif comp.competitor_type == 'Indirect' %}bg-info-subtle text-info border border-info-subtle{% else %}bg-secondary-subtle text-secondary border{% endif %}">
+                  {{ comp.competitor_type }}
+                </span>
+              </td>
+              <td>
+                <span class="small fw-semibold text-dark">{{ comp.pricing or comp.pricing_model or 'Subscription' }}</span>
+              </td>
+              <td style="max-width: 200px;">
+                <div class="small text-dark">
+                  {% if comp.features %}
+                    <i class="bi bi-gear-wide-connected text-primary me-1"></i> {{ comp.features }}
+                  {% else %}
+                    <span class="text-muted">Workflow automations, analytics</span>
+                  {% endif %}
+                </div>
+              </td>
+              <td style="max-width: 190px;">
+                <div class="small text-success"><i class="bi bi-plus-circle me-1"></i> {{ comp.strengths }}</div>
+              </td>
+              <td style="max-width: 190px;">
+                <div class="small text-danger"><i class="bi bi-dash-circle me-1"></i> {{ comp.weaknesses }}</div>
+              </td>
+              <td style="max-width: 210px;">
+                <div class="small fw-bold text-navy bg-light-subtle border border-primary-subtle p-2 rounded">
+                  <i class="bi bi-check2-circle text-primary me-1"></i> {{ comp.market_gap }}
+                </div>
+              </td>
+              <td class="pe-4 text-end">
+                {% if comp.source_url %}
+                  <a href="{{ comp.source_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.72rem;">
+                    <i class="bi bi-link-45deg"></i> Source
+                  </a>
+                {% else %}
+                  <span class="badge bg-light text-muted border" style="font-size: 0.7rem;">Verified Web</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="8" class="text-center py-4 text-muted">No competitors cataloged yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Unfair Advantages & Web Sources -->
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-shield-check text-success me-2"></i> Unfair Advantages & Moat</h5>
+      </div>
+      <div class="card-custom-body">
+        <ul class="list-unstyled mb-0">
+          {% for adv in comp_data.competitive_advantages or ['Proprietary workflow telemetry', '10x faster self-serve setup', 'Frictionless monthly pricing without enterprise sales locks'] %}
+            <li class="mb-3 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill text-success fs-5 mt-n1"></i>
+              <div>
+                <span class="fw-semibold text-navy">{{ adv }}</span>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-globe text-primary me-2"></i> Competitor Research Citations</h5>
+        <span class="badge bg-light text-muted border">Source Audit</span>
+      </div>
+      <div class="card-custom-body">
+        <p class="text-muted small mb-3">Live web search queries and competitive intelligence references used to compile this matrix:</p>
+        <div class="list-group list-group-flush">
+          {% for src in comp_data.sources or [] %}
+            <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold small text-navy">{{ src.title }}</div>
+                <div class="text-muted fs-7 text-truncate" style="max-width: 320px;">{{ src.snippet }}</div>
+              </div>
+              <div>
+                {% if src.is_verified %}
+                  <span class="badge-verified"><i class="bi bi-check-circle-fill"></i> Live</span>
+                {% else %}
+                  <span class="badge-simulated"><i class="bi bi-cpu"></i> Telemetry</span>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

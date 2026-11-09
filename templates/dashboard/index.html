@@ -1,0 +1,595 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Startup Idea Validator AI{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Founder Validation Hub</h2>
+    <p class="text-muted mb-0">Autonomous multi-agent market research and competitive intelligence.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('submit_idea') }}" class="btn btn-primary-custom">
+      <i class="bi bi-plus-circle-fill me-1"></i> Submit New Idea
+    </a>
+    {% if not recent_ideas %}
+    <form action="{{ url_for('api_load_sample_data') }}" method="POST" class="d-inline">
+      <button type="submit" class="btn btn-outline-primary">
+        <i class="bi bi-magic me-1"></i> Load Demo Ideas
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ================= TOP METRIC CARDS ================= -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <div class="stat-lbl">Total Ideas</div>
+        <div class="stat-val">{{ stats.total_ideas }}</div>
+      </div>
+      <div class="stat-icon blue">
+        <i class="bi bi-lightbulb-fill"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <div class="stat-lbl">PROCEED Verdicts</div>
+        <div class="stat-val text-success">{{ stats.proceed_count }} <span class="fs-6 text-muted fw-normal">/ {{ stats.completed_validations }}</span></div>
+      </div>
+      <div class="stat-icon green">
+        <i class="bi bi-check2-circle"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <div class="stat-lbl">Avg. Viability Score</div>
+        <div class="stat-val">{{ stats.avg_score }}/100</div>
+      </div>
+      <div class="stat-icon purple">
+        <i class="bi bi-speedometer2"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <div class="stat-lbl">Improve / Reconsider</div>
+        <div class="stat-val text-warning">{{ stats.improve_count }} <span class="fs-6 text-muted fw-normal">| {{ stats.reconsider_count }}</span></div>
+      </div>
+      <div class="stat-icon amber">
+        <i class="bi bi-arrow-repeat"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FINAL STARTUP VERDICT (MAIN IMPROVEMENT) ================= -->
+{% if active_idea and latest_verdict %}
+<div class="verdict-hero mb-4">
+  <div class="verdict-header">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <div>
+        <span class="text-uppercase small tracking-wide text-light opacity-75 d-block">Final Startup Verdict for</span>
+        <h4 class="fw-bold mb-0 text-white">{{ active_idea.title }}</h4>
+      </div>
+      {% if all_ideas|length > 1 %}
+      <div class="dropdown">
+        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-arrow-left-right me-1"></i> Switch Idea ({{ all_ideas|length }})
+        </button>
+        <ul class="dropdown-menu dropdown-menu-dark shadow">
+          {% for item in all_ideas %}
+          <li>
+            <a class="dropdown-item {% if item.id == active_idea.id %}active{% endif %}" href="{{ url_for('dashboard', idea_id=item.id) }}">
+              {{ item.title }} <small class="text-muted">({{ item.viability_score or 0 }}/100 - {{ item.recommendation }})</small>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      {% if latest_verdict.is_demo %}
+      <span class="badge bg-warning text-dark px-3 py-2 fw-bold border border-warning-subtle" title="This analysis is generated using calibrated demo data">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i> DEMO DATA
+      </span>
+      {% else %}
+      <span class="badge bg-success-subtle text-success px-3 py-2 fw-bold border border-success-subtle">
+        <i class="bi bi-patch-check-fill me-1"></i> VERIFIED LIVE AI
+      </span>
+      {% endif %}
+      <button class="btn btn-sm btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#scoringRulesModal">
+        <i class="bi bi-shield-check text-primary me-1"></i> Transparent Scoring Rules
+      </button>
+    </div>
+  </div>
+
+  <div class="p-4">
+    <div class="row g-4 align-items-stretch">
+      <!-- Left Column: Viability Score and Recommendation -->
+      <div class="col-lg-3 col-md-4">
+        <div class="verdict-score-display h-100">
+          <div class="stat-lbl mb-2 text-uppercase fw-bold text-muted" style="letter-spacing: 0.5px;">Startup Viability</div>
+          
+          <div class="verdict-score-number {% if latest_verdict.viability_score >= 75 %}text-success{% elif latest_verdict.viability_score >= 55 %}text-warning{% else %}text-danger{% endif %}">
+            {{ latest_verdict.viability_score }}<span class="fs-4 text-muted fw-normal">/100</span>
+          </div>
+
+          <div class="my-3">
+            {% if latest_verdict.recommendation == 'PROCEED' %}
+            <span class="verdict-badge verdict-proceed">
+              <i class="bi bi-check-circle-fill"></i> PROCEED
+            </span>
+            {% elif latest_verdict.recommendation == 'IMPROVE' %}
+            <span class="verdict-badge verdict-improve">
+              <i class="bi bi-arrow-repeat"></i> IMPROVE
+            </span>
+            {% else %}
+            <span class="verdict-badge verdict-reconsider">
+              <i class="bi bi-exclamation-octagon-fill"></i> RECONSIDER
+            </span>
+            {% endif %}
+          </div>
+
+          <div class="p-2 rounded bg-white border border-light-subtle small text-muted text-start mt-auto">
+            <span class="fw-bold text-navy d-block mb-1"><i class="bi bi-info-circle me-1"></i> AI Decision Rationale:</span>
+            {{ latest_verdict.scoring_rationale }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: 4 Core Verdict Pillars -->
+      <div class="col-lg-9 col-md-8">
+        <div class="row g-3 h-100">
+          <!-- Pillar 1: Biggest Strength -->
+          <div class="col-md-6">
+            <div class="verdict-pillar-card verdict-pillar-strength">
+              <div class="d-flex align-items-center gap-2 text-success fw-bold mb-2">
+                <i class="bi bi-award-fill fs-5"></i>
+                <span>BIGGEST STRENGTH</span>
+              </div>
+              <p class="text-dark mb-0 small lh-base">
+                {{ latest_verdict.biggest_strength }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Pillar 2: Biggest Weakness / Risk -->
+          <div class="col-md-6">
+            <div class="verdict-pillar-card verdict-pillar-weakness">
+              <div class="d-flex align-items-center gap-2 text-danger fw-bold mb-2">
+                <i class="bi bi-shield-slash-fill fs-5"></i>
+                <span>BIGGEST WEAKNESS / RISK</span>
+              </div>
+              <p class="text-dark mb-0 small lh-base">
+                {{ latest_verdict.biggest_weakness }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Pillar 3: Best Market Opportunity -->
+          <div class="col-md-6">
+            <div class="verdict-pillar-card verdict-pillar-opportunity">
+              <div class="d-flex align-items-center gap-2 text-primary fw-bold mb-2">
+                <i class="bi bi-graph-up-arrow fs-5"></i>
+                <span>BEST MARKET OPPORTUNITY</span>
+              </div>
+              <p class="text-dark mb-0 small lh-base">
+                {{ latest_verdict.best_market_opportunity }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Pillar 4: Recommended Next Action -->
+          <div class="col-md-6">
+            <div class="verdict-pillar-card verdict-pillar-action">
+              <div class="d-flex align-items-center gap-2 text-warning-emphasis fw-bold mb-2">
+                <i class="bi bi-lightning-charge-fill fs-5"></i>
+                <span>RECOMMENDED NEXT ACTION</span>
+              </div>
+              <p class="text-dark mb-0 small lh-base">
+                {{ latest_verdict.recommended_next_action }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verdict Quick Actions Toolbar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 pt-3 border-top">
+      <div class="text-muted small">
+        <i class="bi bi-clock-history me-1"></i> Industry: <b>{{ active_idea.industry or 'Technology' }}</b> | Created: <b>{{ active_idea.created_at[:10] if active_idea.created_at else 'Recent' }}</b>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('view_report', idea_id=active_idea.id) }}" class="btn btn-sm btn-primary-custom">
+          <i class="bi bi-file-earmark-text-fill me-1"></i> Executive Report
+        </a>
+        <a href="{{ url_for('view_competitors', idea_id=active_idea.id) }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-building me-1"></i> Competitors
+        </a>
+        <a href="{{ url_for('view_mvp', idea_id=active_idea.id) }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-kanban me-1"></i> MVP Roadmap
+        </a>
+        <a href="{{ url_for('view_chat', idea_id=active_idea.id) }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-chat-dots-fill me-1"></i> AI Advisor
+        </a>
+        <div class="btn-group btn-group-sm">
+          <a href="{{ url_for('export_pdf', idea_id=active_idea.id) }}" class="btn btn-outline-danger" title="Download Executive PDF Report">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+          </a>
+          <a href="{{ url_for('export_csv', idea_id=active_idea.id) }}" class="btn btn-outline-success" title="Download Comprehensive CSV Data">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> CSV
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ================= AI KEY INSIGHTS & FOUNDER NEXT STEPS ================= -->
+{% if active_idea %}
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-stars text-warning me-2"></i> AI-Generated Key Insights</h5>
+        <span class="badge bg-light text-muted border">Strategic Highlights</span>
+      </div>
+      <div class="card-custom-body">
+        {% set market_info = active_analyses.get('market', {}).get('data', {}) %}
+        {% set gtm_info = active_analyses.get('gtm', {}).get('data', {}) %}
+        {% set swot_info = active_analyses.get('swot_risk', {}).get('data', {}) %}
+
+        <div class="list-group list-group-flush">
+          <div class="list-group-item px-0 py-2 border-0 d-flex gap-3 align-items-start">
+            <div class="badge bg-primary-subtle text-primary p-2 rounded"><i class="bi bi-pie-chart fs-6"></i></div>
+            <div>
+              <span class="fw-bold text-navy d-block">Addressable Market Sizing</span>
+              <span class="small text-muted">TAM of <b>{{ market_info.get('tam', '$10B+') }}</b> growing at <b>{{ market_info.get('cagr', '15%') }}</b> CAGR with realistic 3-year SOM of <b>{{ market_info.get('som', '$120M') }}</b>.</span>
+            </div>
+          </div>
+
+          <div class="list-group-item px-0 py-2 border-0 d-flex gap-3 align-items-start">
+            <div class="badge bg-success-subtle text-success p-2 rounded"><i class="bi bi-bullseye fs-6"></i></div>
+            <div>
+              <span class="fw-bold text-navy d-block">Ideal Customer Profile & Distribution</span>
+              <span class="small text-muted">{{ gtm_info.get('positioning_statement', 'Target high-pain commercial niches seeking automated workflows and measurable time reduction.') }}</span>
+            </div>
+          </div>
+
+          <div class="list-group-item px-0 py-2 border-0 d-flex gap-3 align-items-start">
+            <div class="badge bg-danger-subtle text-danger p-2 rounded"><i class="bi bi-shield-exclamation fs-6"></i></div>
+            <div>
+              <span class="fw-bold text-navy d-block">Primary Risk Mitigation</span>
+              <span class="small text-muted">Counter customer inertia through an intuitive self-serve onboarding experience and immediate trial value.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-check2-square text-success me-2"></i> Founder Action Checklist</h5>
+        <span class="badge bg-light text-muted border">Next Milestones</span>
+      </div>
+      <div class="card-custom-body">
+        <div class="d-flex flex-column gap-3">
+          <div class="p-2 rounded bg-light border d-flex align-items-center gap-3">
+            <input class="form-check-input mt-0 fs-5" type="checkbox" checked id="step1" disabled>
+            <label class="form-check-label small" for="step1">
+              <strong class="text-navy">1. Initial Validation Completed:</strong> AI agents analyzed market, competitors, SWOT, and MVP scope.
+            </label>
+          </div>
+
+          <div class="p-2 rounded bg-light border d-flex align-items-center gap-3">
+            <input class="form-check-input mt-0 fs-5" type="checkbox" id="step2">
+            <label class="form-check-label small" for="step2">
+              <strong class="text-navy">2. Conduct ICP Discovery:</strong> Interview 15 target buyers to validate pricing sensitivity and feature priority.
+            </label>
+          </div>
+
+          <div class="p-2 rounded bg-light border d-flex align-items-center gap-3">
+            <input class="form-check-input mt-0 fs-5" type="checkbox" id="step3">
+            <label class="form-check-label small" for="step3">
+              <strong class="text-navy">3. Build 6-Week Core MVP:</strong> Restrict initial engineering strictly to Must-Have features.
+            </label>
+          </div>
+
+          <div class="p-2 rounded bg-light border d-flex align-items-center gap-3">
+            <input class="form-check-input mt-0 fs-5" type="checkbox" id="step4">
+            <label class="form-check-label small" for="step4">
+              <strong class="text-navy">4. Launch Pre-Order Waitlist:</strong> Deploy landing page with ROI calculator to secure first 10 beta commits.
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ================= CHARTS ROW ================= -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-7">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-compass-fill text-primary me-2"></i> Startup Viability Dimensions</h5>
+        <span class="badge bg-light text-muted border">Dynamic Multi-Agent Scoring</span>
+      </div>
+      <div class="card-custom-body">
+        <div style="height: 280px; position: relative;">
+          <canvas id="viabilityRadarChart"></canvas>
+        </div>
+        <div class="row text-center mt-3 pt-3 border-top g-2">
+          <div class="col-4">
+            <span class="text-muted fs-7 d-block">Market Sizing</span>
+            <span class="fw-bold text-navy">{{ latest_verdict.radar_scores.market if latest_verdict else 85 }}/100</span>
+          </div>
+          <div class="col-4">
+            <span class="text-muted fs-7 d-block">Competitive Moat</span>
+            <span class="fw-bold text-navy">{{ latest_verdict.radar_scores.competition if latest_verdict else 78 }}/100</span>
+          </div>
+          <div class="col-4">
+            <span class="text-muted fs-7 d-block">Execution Feasibility</span>
+            <span class="fw-bold text-navy">{{ latest_verdict.radar_scores.execution if latest_verdict else 82 }}/100</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-pie-chart-fill text-info me-2"></i> Category Distribution</h5>
+        <span class="badge bg-light text-muted border">Portfolio Domain Focus</span>
+      </div>
+      <div class="card-custom-body d-flex flex-column justify-content-center">
+        <div style="height: 220px; position: relative;">
+          <canvas id="categoryDistributionChart"></canvas>
+        </div>
+        <div class="text-center mt-3">
+          <p class="text-muted fs-7 mb-0">Breakdown of submitted startup ideas across technology domains.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= RECENT IDEAS TABLE ================= -->
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-collection-fill text-primary me-2"></i> Recent Startup Ideas</h5>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('view_history') }}" class="btn btn-sm btn-outline-secondary">View All Ideas & Compare</a>
+    </div>
+  </div>
+  <div class="card-custom-body p-0">
+    {% if recent_ideas %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Startup Concept</th>
+              <th>Industry</th>
+              <th>Viability Score</th>
+              <th>Recommendation</th>
+              <th>Status</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in recent_ideas %}
+              <tr class="{% if active_idea and item.id == active_idea.id %}table-primary-subtle{% endif %}">
+                <td class="ps-4">
+                  <div class="fw-bold text-navy">
+                    <a href="{{ url_for('dashboard', idea_id=item.id) }}" class="text-decoration-none text-navy hover-primary" title="Click to view verdict on dashboard">
+                      {{ item.title }}
+                    </a>
+                    {% if item.is_sample %}
+                      <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-1" style="font-size: 0.65rem;">Sample</span>
+                    {% endif %}
+                    {% if active_idea and item.id == active_idea.id %}
+                      <span class="badge bg-primary text-white ms-1" style="font-size: 0.65rem;">Active Verdict</span>
+                    {% endif %}
+                  </div>
+                  <div class="text-muted small text-truncate" style="max-width: 380px;">
+                    {{ item.problem_statement or item.raw_description }}
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark border">
+                    {{ item.industry or 'Technology' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge-score {% if (item.viability_score or 0) >= 75 %}high{% elif (item.viability_score or 0) >= 55 %}medium{% else %}low{% endif %}">
+                    {{ item.viability_score or 0 }}/100
+                  </span>
+                </td>
+                <td>
+                  <span class="fw-semibold {% if item.recommendation == 'PROCEED' %}text-success{% elif item.recommendation == 'IMPROVE' %}text-warning{% else %}text-danger{% endif %} small">
+                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+                    {{ item.recommendation or 'In Progress' }}
+                  </span>
+                </td>
+                <td>
+                  {% if item.status == 'completed' %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">Completed</span>
+                  {% elif item.status == 'analyzing' %}
+                    <span class="badge bg-info-subtle text-info border border-info-subtle">
+                      <span class="spinner-border spinner-border-sm me-1" role="status"></span> Analyzing
+                    </span>
+                  {% else %}
+                    <span class="badge bg-secondary-subtle text-secondary border">Draft</span>
+                  {% endif %}
+                </td>
+                <td class="text-end pe-4">
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('dashboard', idea_id=item.id) }}" class="btn btn-outline-primary" title="Display Verdict">
+                      <i class="bi bi-eye"></i> Verdict
+                    </a>
+                    <a href="{{ url_for('view_report', idea_id=item.id) }}" class="btn btn-outline-secondary" title="View Executive Report">
+                      <i class="bi bi-file-earmark-text"></i>
+                    </a>
+                    <a href="{{ url_for('export_pdf', idea_id=item.id) }}" class="btn btn-outline-danger" title="Download PDF">
+                      <i class="bi bi-file-earmark-pdf"></i>
+                    </a>
+                    <a href="{{ url_for('export_csv', idea_id=item.id) }}" class="btn btn-outline-success" title="Download CSV">
+                      <i class="bi bi-file-earmark-spreadsheet"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-5">
+        <div class="d-inline-flex bg-light rounded-circle p-4 mb-3 text-muted">
+          <i class="bi bi-lightbulb fs-1"></i>
+        </div>
+        <h5 class="fw-bold">No Startup Ideas Submitted Yet</h5>
+        <p class="text-muted small mb-3">Submit your business concept or load pre-analyzed demo ideas to see the AI validation engine in action.</p>
+        <div class="d-flex justify-content-center gap-2">
+          <a href="{{ url_for('submit_idea') }}" class="btn btn-primary-custom btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Submit First Idea
+          </a>
+          <form action="{{ url_for('api_load_sample_data') }}" method="POST">
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-magic me-1"></i> Load Demo Ideas
+            </button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ================= TRANSPARENT SCORING RULES MODAL ================= -->
+<div class="modal fade" id="scoringRulesModal" tabindex="-1" aria-labelledby="scoringRulesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-navy text-white">
+        <h5 class="modal-title fw-bold" id="scoringRulesModalLabel">
+          <i class="bi bi-shield-check text-warning me-2"></i> Transparent Scoring Rules & Methodology
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="text-muted small mb-4">
+          The <strong>Final Startup Verdict</strong> is generated through a rigorous weighted multi-factor model synthesized from all 8 validation agents. No subjective guessing is used.
+        </p>
+
+        <div class="table-responsive mb-4">
+          <table class="table table-bordered align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Scoring Dimension</th>
+                <th>Weight</th>
+                <th>Evaluation Benchmark</th>
+                <th>Threshold Rules</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong class="text-navy">Market Opportunity</strong></td>
+                <td><span class="badge bg-primary">30%</span></td>
+                <td class="small">TAM > $1B, CAGR > 12%, identified high-intent buyer pain points.</td>
+                <td class="small text-muted">>80 = Massive headroom; <50 = Saturated or niche</td>
+              </tr>
+              <tr>
+                <td><strong class="text-navy">Competitive Moat</strong></td>
+                <td><span class="badge bg-info text-dark">25%</span></td>
+                <td class="small">Gaps in incumbent pricing, usability, self-serve speed, and automation.</td>
+                <td class="small text-muted">>75 = Defensible differentiation; <50 = Red ocean copycat</td>
+              </tr>
+              <tr>
+                <td><strong class="text-navy">Execution Feasibility</strong></td>
+                <td><span class="badge bg-success">25%</span></td>
+                <td class="small">Clarity of 6-week MVP roadmap, low technical hurdles, clear core loop.</td>
+                <td class="small text-muted">>80 = Rapid 6-wk launch; <50 = Complex R&D bottleneck</td>
+              </tr>
+              <tr>
+                <td><strong class="text-navy">Risk Resistance</strong></td>
+                <td><span class="badge bg-warning text-dark">20%</span></td>
+                <td class="small">Absence of existential regulatory, high-CAC, or operational risks.</td>
+                <td class="small text-muted">>70 = Manageable headwinds; <40 = High vulnerability</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-3 rounded bg-light border">
+          <h6 class="fw-bold text-navy mb-2"><i class="bi bi-signpost-split me-1"></i> Recommendation Decision Thresholds:</h6>
+          <div class="d-flex flex-column gap-2 small">
+            <div>
+              <span class="badge bg-success me-2">PROCEED (Score &ge; 75)</span>
+              Strong validation across market, defensibility, and execution. Immediate recommendation to build MVP.
+            </div>
+            <div>
+              <span class="badge bg-warning text-dark me-2">IMPROVE (Score 55 - 74)</span>
+              Viable core concept, but requires strategic iteration on customer acquisition, pricing, or defensibility before building.
+            </div>
+            <div>
+              <span class="badge bg-danger me-2">RECONSIDER (Score &lt; 55)</span>
+              Elevated structural headwinds or excessive competitor moats. Recommend pivoting the core value proposition.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Dynamic radar chart values from active idea's verdict
+    const radarData = {
+        market: {{ latest_verdict.radar_scores.market if latest_verdict else 85 }},
+        competition: {{ latest_verdict.radar_scores.competition if latest_verdict else 78 }},
+        execution: {{ latest_verdict.radar_scores.execution if latest_verdict else 82 }},
+        business: {{ latest_verdict.radar_scores.business if latest_verdict else 80 }},
+        riskResistance: {{ latest_verdict.radar_scores.riskResistance if latest_verdict else 72 }}
+    };
+
+    renderViabilityRadar("viabilityRadarChart", radarData);
+
+    // Extract categories
+    const categories = [];
+    {% for idea in all_ideas %}
+      categories.push("{{ idea.industry or 'Technology' }}");
+    {% endfor %}
+
+    const counts = {};
+    categories.forEach(c => { counts[c] = (counts[c] || 0) + 1; });
+    const labels = Object.keys(counts).slice(0, 5);
+    const dataVals = Object.values(counts).slice(0, 5);
+
+    renderCategoryChart("categoryDistributionChart", labels, dataVals);
+});
+</script>
+{% endblock %}

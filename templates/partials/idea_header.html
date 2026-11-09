@@ -1,0 +1,72 @@
+{% if idea %}
+<div class="card-custom mb-4">
+  <div class="card-custom-body pb-2">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+            <i class="bi bi-tag-fill me-1"></i> {{ idea.industry or 'Technology' }}
+          </span>
+          {% if idea.is_sample %}
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+              <i class="bi bi-info-circle me-1"></i> Sample Demo Data
+            </span>
+          {% endif %}
+          <span class="text-muted fs-7">Submitted {{ idea.created_at[:10] if idea.created_at else '' }}</span>
+        </div>
+        <h3 class="mb-0 fw-bold">{{ idea.title }}</h3>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end">
+          <div class="text-muted fs-7 text-uppercase fw-semibold">Viability Score</div>
+          <div class="fs-4 fw-extrabold {% if idea.viability_score >= 75 %}text-success{% elif idea.viability_score >= 55 %}text-warning{% else %}text-danger{% endif %}">
+            {{ idea.viability_score or 0 }}/100
+          </div>
+        </div>
+        <div>
+          <span class="badge {% if idea.viability_score >= 75 %}bg-success{% elif idea.viability_score >= 55 %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6 px-3 py-2 rounded-pill">
+            {{ idea.recommendation or 'Evaluating' }}
+          </span>
+        </div>
+        <div class="btn-group">
+          <a href="{{ url_for('export_pdf', idea_id=idea.id) }}" class="btn btn-sm btn-outline-danger" title="Download Executive PDF">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+          </a>
+          <a href="{{ url_for('export_json', idea_id=idea.id) }}" class="btn btn-sm btn-outline-secondary" title="Export Raw JSON">
+            <i class="bi bi-code-slash me-1"></i> JSON
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-navigation Tabs -->
+    <nav class="idea-nav-tabs">
+      <a class="nav-link {% if request.endpoint == 'view_report' %}active{% endif %}" href="{{ url_for('view_report', idea_id=idea.id) }}">
+        <i class="bi bi-file-earmark-text"></i> Executive Report
+      </a>
+      <a class="nav-link {% if request.endpoint == 'view_market' %}active{% endif %}" href="{{ url_for('view_market', idea_id=idea.id) }}">
+        <i class="bi bi-pie-chart"></i> Market Opportunity
+      </a>
+      <a class="nav-link {% if request.endpoint == 'view_competitors' %}active{% endif %}" href="{{ url_for('view_competitors', idea_id=idea.id) }}">
+        <i class="bi bi-binoculars"></i> Competitor Matrix
+      </a>
+      <a class="nav-link {% if request.endpoint == 'view_swot' %}active{% endif %}" href="{{ url_for('view_swot', idea_id=idea.id) }}">
+        <i class="bi bi-shield-shaded"></i> SWOT Analysis
+      </a>
+      <a class="nav-link {% if request.endpoint == 'view_risks' %}active{% endif %}" href="{{ url_for('view_risks', idea_id=idea.id) }}">
+        <i class="bi bi-exclamation-octagon"></i> Risk Playbook
+      </a>
+      <a class="nav-link {% if request.endpoint == 'view_mvp' %}active{% endif %}" href="{{ url_for('view_mvp', idea_id=idea.id) }}">
+        <i class="bi bi-layers"></i> MVP Scope
+      </a>
+      <a class="nav-link {% if request.endpoint == 'view_gtm' %}active{% endif %}" href="{{ url_for('view_gtm', idea_id=idea.id) }}">
+        <i class="bi bi-graph-up-arrow"></i> GTM Strategy
+      </a>
+      <a class="nav-link {% if request.endpoint == 'view_chat' %}active{% endif %}" href="{{ url_for('view_chat', idea_id=idea.id) }}">
+        <i class="bi bi-chat-square-dots-fill text-primary"></i> Chat Advisor
+      </a>
+    </nav>
+  </div>
+</div>
+{% endif %}

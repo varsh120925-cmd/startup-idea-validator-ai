@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Startup Idea — Startup Idea Validator AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-10 col-xl-9">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">Submit Startup Idea for Validation</h2>
+        <p class="text-muted mb-0">Our 8 AI research agents will autonomously analyze market demand, competitors, risks, MVP scope, and GTM strategy.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Autofill Presets -->
+    <div class="card-custom mb-4 bg-light-subtle">
+      <div class="card-custom-body py-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <span class="small fw-bold text-navy">
+            <i class="bi bi-lightning-fill text-warning me-1"></i> Instant Autofill Sample Ideas:
+          </span>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-primary" onclick="fillSampleIdea('legal')">
+              <i class="bi bi-file-earmark-lock me-1"></i> LegalTech Copilot
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="fillSampleIdea('climate')">
+              <i class="bi bi-tree me-1"></i> ClimateTech ESG
+            </button>
+            <button type="button" class="btn btn-outline-info" onclick="fillSampleIdea('health')">
+              <i class="bi bi-heart-pulse me-1"></i> Clinical AI Scribe
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submission Form -->
+    <div class="card-custom">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-journal-text text-primary me-2"></i> Startup Idea Details</h5>
+        <span class="badge bg-primary-subtle text-primary border">Step 1 of 1</span>
+      </div>
+
+      <div class="card-custom-body p-4">
+        <form method="POST" action="{{ url_for('submit_idea') }}" id="ideaSubmissionForm">
+          <div class="row g-3 mb-3">
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">Startup Title / Working Name <span class="text-danger">*</span></label>
+              <input type="text" name="title" id="titleInput" class="form-control" placeholder="e.g. LexiDraft AI — Freelancer Contract Copilot" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Industry Domain <span class="text-danger">*</span></label>
+              <select name="industry" id="industrySelect" class="form-select" required>
+                <option value="B2B SaaS / Productivity">B2B SaaS / Productivity</option>
+                <option value="LegalTech / Productivity SaaS">LegalTech / Legal SaaS</option>
+                <option value="ClimateTech / Enterprise ESG">ClimateTech / ESG</option>
+                <option value="Digital Health / MedTech">Digital Health / MedTech</option>
+                <option value="FinTech / Payments">FinTech / Payments</option>
+                <option value="EdTech / Learning">EdTech / Education</option>
+                <option value="Developer Tools / DevOps">Developer Tools / Infrastructure</option>
+                <option value="E-Commerce / RetailTech">E-Commerce / Direct to Consumer</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Raw Idea & Elevator Pitch <span class="text-danger">*</span>
+              <span class="text-muted fw-normal small">(Describe your startup idea in natural language)</span>
+            </label>
+            <textarea name="raw_description" id="descInput" rows="4" class="form-control" placeholder="Describe the business concept, who it helps, what makes it unique, and how it works..." required></textarea>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Target Audience / ICP <span class="text-muted fw-normal small">(Optional)</span></label>
+              <input type="text" name="target_audience" id="targetAudienceInput" class="form-control" placeholder="e.g. Freelance developers, boutique design agencies">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Intended Revenue Model <span class="text-muted fw-normal small">(Optional)</span></label>
+              <input type="text" name="revenue_model" id="revenueInput" class="form-control" placeholder="e.g. Monthly SaaS Subscription ($29/mo) or Usage-Based">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Core Problem Statement <span class="text-muted fw-normal small">(Optional)</span></label>
+              <textarea name="problem_statement" id="problemInput" rows="2" class="form-control" placeholder="What specific pain point or friction are customers experiencing?"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Proposed Solution Concept <span class="text-muted fw-normal small">(Optional)</span></label>
+              <textarea name="proposed_solution" id="solutionInput" rows="2" class="form-control" placeholder="How does your product solve this problem faster, cheaper, or better?"></textarea>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap justify-content-between align-items-center pt-3 border-top gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="run_async" value="true" id="asyncCheck" checked>
+              <label class="form-check-label small text-muted" for="asyncCheck">
+                Run Multi-Agent validation with live progress tracking
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary-custom px-4 py-2" id="submitBtn">
+              <i class="bi bi-play-circle-fill me-2"></i> Launch Multi-Agent Validation
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MULTI-AGENT VALIDATION PROGRESS MODAL ================= -->
+<div class="modal fade" id="validationProgressModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="validationProgressModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow-lg border-0">
+      <div class="modal-header bg-navy text-white">
+        <div>
+          <h5 class="modal-title fw-bold mb-0" id="validationProgressModalLabel">
+            <span class="spinner-grow spinner-grow-sm text-info me-2" role="status" id="headerSpinner"></span>
+            AI Multi-Agent Validation Pipeline
+          </h5>
+          <span class="small text-light opacity-75">Autonomous collaborative market research & strategic analysis</span>
+        </div>
+      </div>
+      <div class="modal-body p-4">
+        <!-- Overall Progress Bar -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-bold text-navy small" id="overallStatusText">Initiating Agent Pipeline...</span>
+            <span class="fw-bold text-primary" id="overallPercentText">0%</span>
+          </div>
+          <div class="progress" style="height: 10px;">
+            <div id="overallProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- 8 Agents Step List -->
+        <div class="list-group list-group-flush border rounded-3 overflow-hidden mb-3">
+          <!-- Agent 1 -->
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 agent-step" id="agent-row-extractor">
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-primary"><i class="bi bi-file-earmark-text-fill fs-5"></i></div>
+              <div>
+                <strong class="d-block text-navy" style="font-size: 0.88rem;">1. Idea Extractor</strong>
+                <span class="text-muted" style="font-size: 0.78rem;">Business concept, problem, solution & revenue model extraction</span>
+              </div>
+            </div>
+            <span class="badge bg-secondary-subtle text-muted" id="agent-badge-extractor">Pending</span>
+          </div>
+
+          <!-- Agent 2 -->
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 agent-step" id="agent-row-market">
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-info"><i class="bi bi-pie-chart-fill fs-5"></i></div>
+              <div>
+                <strong class="d-block text-navy" style="font-size: 0.88rem;">2. Market Analyzer</strong>
+                <span class="text-muted" style="font-size: 0.78rem;">TAM / SAM / SOM calculation, CAGR trends & customer personas</span>
+              </div>
+            </div>
+            <span class="badge bg-secondary-subtle text-muted" id="agent-badge-market">Pending</span>
+          </div>
+
+          <!-- Agent 3 -->
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 agent-step" id="agent-row-competitors">
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-warning"><i class="bi bi-binoculars-fill fs-5"></i></div>
+              <div>
+                <strong class="d-block text-navy" style="font-size: 0.88rem;">3. Competitor Agent</strong>
+                <span class="text-muted" style="font-size: 0.78rem;">Live web competitor discovery, pricing models & defensibility gaps</span>
+              </div>
+            </div>
+            <span class="badge bg-secondary-subtle text-muted" id="agent-badge-competitors">Pending</span>
+          </div>
+
+          <!-- Agent 4 -->
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 agent-step" id="agent-row-swot_risk">
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-danger"><i class="bi bi-shield-shaded fs-5"></i></div>
+              <div>
+                <strong class="d-block text-navy" style="font-size: 0.88rem;">4. SWOT & Risk Agent</strong>
+                <span class="text-muted" style="font-size: 0.78rem;">Strategic SWOT matrix, severity ratings & risk mitigation playbook</span>
+              </div>
+            </div>
+            <span class="badge bg-secondary-subtle text-muted" id="agent-badge-swot_risk">Pending</span>
+          </div>
+
+          <!-- Agent 5 -->
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 agent-step" id="agent-row-mvp">
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-success"><i class="bi bi-kanban-fill fs-5"></i></div>
+              <div>
+                <strong class="d-block text-navy" style="font-size: 0.88rem;">5. MVP Recommender</strong>
+                <span class="text-muted" style="font-size: 0.78rem;">MoSCoW feature prioritization & 6-Week development roadmap</span>
+              </div>
+            </div>
+            <span class="badge bg-secondary-subtle text-muted" id="agent-badge-mvp">Pending</span>
+          </div>
+
+          <!-- Agent 6 -->
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 agent-step" id="agent-row-gtm">
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-primary"><i class="bi bi-rocket-takeoff-fill fs-5"></i></div>
+              <div>
+                <strong class="d-block text-navy" style="font-size: 0.88rem;">6. Go-to-Market Strategist</strong>
+                <span class="text-muted" style="font-size: 0.78rem;">Positioning, acquisition channels, pricing tiers & launch schedule</span>
+              </div>
+            </div>
+            <span class="badge bg-secondary-subtle text-muted" id="agent-badge-gtm">Pending</span>
+          </div>
+
+          <!-- Agent 7 -->
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 agent-step" id="agent-row-advisor">
+            <div class="d-flex align-items-center gap-3">
+              <div style="color: #8b5cf6;"><i class="bi bi-chat-quote-fill fs-5"></i></div>
+              <div>
+                <strong class="d-block text-navy" style="font-size: 0.88rem;">7. Startup Advisor</strong>
+                <span class="text-muted" style="font-size: 0.78rem;">Executive advisory brief, First 100 Customers playbook & red flags</span>
+              </div>
+            </div>
+            <span class="badge bg-secondary-subtle text-muted" id="agent-badge-advisor">Pending</span>
+          </div>
+
+          <!-- Agent 8 -->
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 agent-step" id="agent-row-report">
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-secondary"><i class="bi bi-file-earmark-bar-graph-fill fs-5"></i></div>
+              <div>
+                <strong class="d-block text-navy" style="font-size: 0.88rem;">8. Report Generator</strong>
+                <span class="text-muted" style="font-size: 0.78rem;">Final viability verdict, scoring rubric synthesis & executive report</span>
+              </div>
+            </div>
+            <span class="badge bg-secondary-subtle text-muted" id="agent-badge-report">Pending</span>
+          </div>
+        </div>
+
+        <div id="completionBanner" class="alert alert-success d-none mb-0 d-flex justify-content-between align-items-center">
+          <div>
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <strong>Multi-Agent Validation Complete!</strong> Loading your report...
+          </div>
+          <a href="#" id="viewReportBtn" class="btn btn-sm btn-success">View Results Now</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/submission.js') }}"></script>
+{% endblock %}

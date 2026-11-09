@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Executive Validation Report — {{ idea.title }}{% endblock %}
+
+{% block content %}
+{% include 'partials/idea_header.html' %}
+
+<!-- Export Actions Bar -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 p-3 bg-white border rounded-3 shadow-sm">
+  <div class="d-flex align-items-center gap-2">
+    <i class="bi bi-file-earmark-check-fill text-success fs-4"></i>
+    <div>
+      <span class="fw-bold text-navy d-block">Official Validation Report</span>
+      <span class="text-muted fs-7">Prepared autonomously by multi-agent research pipeline</span>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('export_pdf', idea_id=idea.id) }}" class="btn btn-danger btn-sm">
+      <i class="bi bi-file-earmark-pdf-fill me-1"></i> Download PDF Report
+    </a>
+    <a href="{{ url_for('export_markdown', idea_id=idea.id) }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-markdown me-1"></i> Markdown
+    </a>
+    <a href="{{ url_for('export_json', idea_id=idea.id) }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-code-slash me-1"></i> JSON
+    </a>
+    <button onclick="window.print()" class="btn btn-outline-dark btn-sm">
+      <i class="bi bi-printer me-1"></i> Print
+    </button>
+  </div>
+</div>
+
+<!-- Executive Summary Hero Card -->
+<div class="card-custom mb-4 border-primary shadow-sm">
+  <div class="card-custom-header bg-primary text-white">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-award-fill me-2"></i> Executive Summary & Committee Verdict</h5>
+    <span class="badge bg-white text-primary fw-bold">Overall Score: {{ idea.viability_score or 78 }}/100</span>
+  </div>
+  <div class="card-custom-body p-4">
+    <div class="row align-items-center mb-3">
+      <div class="col-md-9">
+        <h4 class="fw-bold text-navy mb-2">{{ idea.title }}</h4>
+        <p class="lead fs-6 text-dark mb-0">
+          {{ report_data.executive_summary or 'A compelling automated software solution addressing verified friction in target market with strong unit economics.' }}
+        </p>
+      </div>
+      <div class="col-md-3 text-center border-start">
+        <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Final Recommendation</div>
+        <span class="badge {% if idea.viability_score >= 75 %}bg-success{% elif idea.viability_score >= 55 %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6 px-3 py-2 rounded-pill">
+          {{ report_data.recommendation or idea.recommendation or 'Strong Pursue' }}
+        </span>
+      </div>
+    </div>
+
+    {% if report_data.go_no_go_verdict %}
+      <div class="p-3 bg-light rounded-3 border-start border-primary border-4 mt-3">
+        <strong class="text-primary"><i class="bi bi-check-circle-fill me-1"></i> Committee Verdict:</strong>
+        <span class="text-navy fw-semibold">{{ report_data.go_no_go_verdict }}</span>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Section 1: Problem-Solution Fit -->
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-puzzle-fill text-primary me-2"></i> 1. Problem & Solution Fit</h5>
+  </div>
+  <div class="card-custom-body">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="p-3 bg-light rounded-3 border h-100">
+          <h6 class="fw-bold text-danger mb-2"><i class="bi bi-exclamation-triangle-fill me-1"></i> Documented Market Pain Point</h6>
+          <p class="small text-muted mb-0">
+            {{ idea.problem_statement or idea.raw_description }}
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="p-3 bg-light rounded-3 border h-100">
+          <h6 class="fw-bold text-success mb-2"><i class="bi bi-check-circle-fill me-1"></i> Proposed Product Solution</h6>
+          <p class="small text-muted mb-0">
+            {{ idea.proposed_solution or 'An intuitive, automated workflow delivering 10x faster execution.' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 2: Market Sizing -->
+{% set market = analyses.market.data if analyses.market else {} %}
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-pie-chart-fill text-primary me-2"></i> 2. Market Opportunity (TAM / SAM / SOM)</h5>
+  </div>
+  <div class="card-custom-body">
+    <div class="row g-3 text-center mb-4">
+      <div class="col-md-3">
+        <div class="p-3 bg-light rounded border">
+          <div class="fs-7 text-muted fw-bold">TAM</div>
+          <div class="fs-3 fw-extrabold text-navy">{{ market.tam or '$14.2B' }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3 bg-light rounded border">
+          <div class="fs-7 text-muted fw-bold">SAM</div>
+          <div class="fs-3 fw-extrabold text-primary">{{ market.sam or '$3.1B' }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3 bg-light rounded border">
+          <div class="fs-7 text-muted fw-bold">SOM (Year 3)</div>
+          <div class="fs-3 fw-extrabold text-success">{{ market.som or '$180M' }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3 bg-light rounded border">
+          <div class="fs-7 text-muted fw-bold">CAGR Growth</div>
+          <div class="fs-3 fw-extrabold text-info">{{ market.cagr or '15.8%' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 3: Competitor Summary -->
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-binoculars-fill text-primary me-2"></i> 3. Competitor Landscape</h5>
+  </div>
+  <div class="card-custom-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Competitor</th>
+            <th>Type</th>
+            <th>Pricing Model</th>
+            <th>Customer Limitation</th>
+            <th class="pe-4">Your Market Gap</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comp in competitors %}
+            <tr>
+              <td class="ps-4 fw-bold text-navy">{{ comp.name }}</td>
+              <td><span class="badge bg-light text-dark border">{{ comp.competitor_type }}</span></td>
+              <td><span class="small">{{ comp.pricing_model }}</span></td>
+              <td><span class="small text-danger">{{ comp.weaknesses }}</span></td>
+              <td class="pe-4"><span class="small fw-bold text-success">{{ comp.market_gap }}</span></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="text-center py-3 text-muted">No competitors cataloged.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Section 4: SWOT & Risks -->
+{% set swot = analyses.swot_risk.data.swot if analyses.swot_risk else {} %}
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-shield-shaded text-primary me-2"></i> 4. SWOT Matrix Summary</h5>
+      </div>
+      <div class="card-custom-body">
+        <div class="mb-3">
+          <strong class="text-success"><i class="bi bi-check-circle me-1"></i> Key Strengths:</strong>
+          <ul class="mb-0 small ps-3">
+            {% for s in swot.strengths or ['Lean, agile deployment', 'Proprietary automated workflow'] %}
+              <li>{{ s }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <strong class="text-danger"><i class="bi bi-exclamation-circle me-1"></i> Key Weaknesses:</strong>
+          <ul class="mb-0 small ps-3">
+            {% for w in swot.weaknesses or ['Early brand recognition', 'Capital constraints'] %}
+              <li>{{ w }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-shield-exclamation text-danger me-2"></i> 5. Critical Risks & Mitigation</h5>
+      </div>
+      <div class="card-custom-body">
+        {% set risks = analyses.swot_risk.data.risks if analyses.swot_risk else [] %}
+        {% for r in risks[:3] %}
+          <div class="p-2 mb-2 bg-light rounded border">
+            <div class="d-flex justify-content-between">
+              <span class="fw-bold small text-navy">{{ r.risk }}</span>
+              <span class="badge {% if r.severity == 'High' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ r.severity }}</span>
+            </div>
+            <div class="small text-muted mt-1"><strong>Mitigation:</strong> {{ r.mitigation }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 5: MVP Scope & Immediate Next Steps -->
+<div class="card-custom">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-list-check text-primary me-2"></i> 6. Immediate Next Steps & Launch Roadmap</h5>
+  </div>
+  <div class="card-custom-body">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <h6 class="fw-bold text-navy mb-2">Essential Day-1 MVP Scope:</h6>
+        {% set mvp = analyses.mvp.data if analyses.mvp else {} %}
+        <ul class="list-unstyled mb-0">
+          {% for m in mvp.must_have or ['Core automated processing loop', 'User workspace authentication', 'Exportable executive PDF summaries'] %}
+            <li class="mb-2 small d-flex align-items-center gap-2">
+              <i class="bi bi-check-square-fill text-success"></i>
+              <span><strong>{{ m }}</strong></span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="col-md-6">
+        <h6 class="fw-bold text-navy mb-2">Immediate Founder Action Items:</h6>
+        <ul class="list-unstyled mb-0">
+          {% for step in report_data.next_immediate_steps or [
+            'Conduct 15 customer discovery interviews with target ICP personas',
+            'Finalize 6-week technical MVP sprint focused strictly on core loop',
+            'Deploy waitlist landing page and start founder-led outbound'
+          ] %}
+            <li class="mb-2 small d-flex align-items-center gap-2">
+              <i class="bi bi-arrow-right-circle-fill text-primary"></i>
+              <span>{{ step }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

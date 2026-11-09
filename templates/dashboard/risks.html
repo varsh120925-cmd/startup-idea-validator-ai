@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Risk Analysis & Mitigation — {{ idea.title }}{% endblock %}
+
+{% block content %}
+{% include 'partials/idea_header.html' %}
+
+<!-- Risk Overview Scorecard -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Composite Risk Score</div>
+      <div class="fs-2 fw-extrabold {% if overall_risk_score > 60 %}text-danger{% elif overall_risk_score > 35 %}text-warning{% else %}text-success{% endif %}">
+        {{ overall_risk_score }}/100
+      </div>
+      <div class="text-muted small">Lower score indicates lower venture risk</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Risk Classification</div>
+      <div class="fs-2 fw-extrabold text-navy">{{ risk_rating }}</div>
+      <div class="text-muted small">Based on impact vs likelihood matrix</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-custom text-center p-3">
+      <div class="text-muted fs-7 text-uppercase fw-bold mb-1">Critical Risks Monitored</div>
+      <div class="fs-2 fw-extrabold text-primary">{{ risks|length }}</div>
+      <div class="text-muted small">Multi-category stress test</div>
+    </div>
+  </div>
+</div>
+
+<!-- Founder Cautionary Advice -->
+{% if founder_advice %}
+<div class="alert alert-warning border-warning d-flex align-items-center mb-4 p-3 shadow-sm" role="alert">
+  <i class="bi bi-exclamation-octagon-fill fs-3 me-3 text-warning"></i>
+  <div>
+    <h6 class="fw-bold mb-1">Critical Founder Guidance</h6>
+    <div class="small">{{ founder_advice }}</div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Categorized Risk Table -->
+<div class="card-custom mb-4">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-shield-exclamation text-danger me-2"></i> Categorized Risk Matrix & Mitigation Playbook</h5>
+    <span class="badge bg-light text-muted border">Venture Due Diligence</span>
+  </div>
+  <div class="card-custom-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Risk Category</th>
+            <th>Specific Risk Description</th>
+            <th>Severity</th>
+            <th>Impact</th>
+            <th>Likelihood</th>
+            <th class="pe-4">Actionable Mitigation Playbook</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in risks %}
+            <tr>
+              <td class="ps-4">
+                <span class="badge bg-light text-dark border fw-bold">
+                  {{ r.category }}
+                </span>
+              </td>
+              <td style="max-width: 280px;">
+                <div class="small fw-semibold text-navy">{{ r.risk }}</div>
+              </td>
+              <td>
+                <span class="badge {% if r.severity == 'High' %}bg-danger-subtle text-danger border border-danger-subtle{% elif r.severity == 'Medium' %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% else %}bg-success-subtle text-success border border-success-subtle{% endif %}">
+                  {{ r.severity }}
+                </span>
+              </td>
+              <td>
+                <span class="small fw-bold">{{ r.impact_score or 7 }}/10</span>
+              </td>
+              <td>
+                <span class="small text-muted">{{ r.likelihood_score or 5 }}/10</span>
+              </td>
+              <td class="pe-4" style="max-width: 380px;">
+                <div class="p-2 bg-light rounded small text-dark border">
+                  <i class="bi bi-shield-check text-success me-1"></i>
+                  <strong>Mitigation:</strong> {{ r.mitigation }}
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center py-4 text-muted">No risks cataloged.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Settings & API Configuration — Startup Idea Validator AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9 col-xl-8">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">System Settings & API Configuration</h2>
+        <p class="text-muted mb-0">Configure Groq LLM inference, Tavily web search, model preferences, and demo mode.</p>
+      </div>
+      <div>
+        {% if demo_mode or not groq_key_set %}
+          <span class="badge bg-warning text-dark px-3 py-2 fw-bold">
+            <i class="bi bi-shield-exclamation me-1"></i> DEMO MODE
+          </span>
+        {% else %}
+          <span class="badge bg-success px-3 py-2 fw-bold">
+            <i class="bi bi-patch-check-fill me-1"></i> LIVE AI MODE
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Live Connection Status Strip -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card-custom p-3 text-center">
+          <span class="text-muted fs-8 text-uppercase fw-bold d-block mb-1">Groq AI Engine</span>
+          <div class="d-flex justify-content-center align-items-center gap-1">
+            {% if groq_key_set %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle" id="groqStatusBadge">
+                <i class="bi bi-check-circle-fill me-1"></i> Key Configured
+              </span>
+            {% else %}
+              <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" id="groqStatusBadge">
+                <i class="bi bi-exclamation-circle me-1"></i> Key Missing
+              </span>
+            {% endif %}
+          </div>
+          <small class="text-muted d-block mt-1 fs-8">{{ current_model }}</small>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card-custom p-3 text-center">
+          <span class="text-muted fs-8 text-uppercase fw-bold d-block mb-1">Tavily Web Search</span>
+          <div class="d-flex justify-content-center align-items-center gap-1">
+            {% if tavily_key_set %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle" id="tavilyStatusBadge">
+                <i class="bi bi-check-circle-fill me-1"></i> Key Configured
+              </span>
+            {% else %}
+              <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" id="tavilyStatusBadge">
+                <i class="bi bi-exclamation-circle me-1"></i> Key Missing
+              </span>
+            {% endif %}
+          </div>
+          <small class="text-muted d-block mt-1 fs-8">Competitor & Market Research</small>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card-custom p-3 text-center">
+          <span class="text-muted fs-8 text-uppercase fw-bold d-block mb-1">Operational Mode</span>
+          <div class="d-flex justify-content-center align-items-center gap-1">
+            {% if demo_mode %}
+              <span class="badge bg-warning text-dark border">
+                <i class="bi bi-cpu me-1"></i> Simulated Demo
+              </span>
+            {% elif groq_key_set %}
+              <span class="badge bg-success text-white border">
+                <i class="bi bi-broadcast me-1"></i> Live Multi-Agent
+              </span>
+            {% else %}
+              <span class="badge bg-secondary text-white border">
+                <i class="bi bi-cpu me-1"></i> Fallback Engine
+              </span>
+            {% endif %}
+          </div>
+          <small class="text-muted d-block mt-1 fs-8">Strictly labeled attribution</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile Card -->
+    <div class="card-custom mb-4">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-person-circle text-primary me-2"></i> Founder Profile</h5>
+        <span class="badge bg-light text-muted border">Account</span>
+      </div>
+      <div class="card-custom-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-muted">Full Name</label>
+            <input type="text" class="form-control" value="{{ current_user.full_name or current_user.username }}" readonly>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-muted">Email Address</label>
+            <input type="email" class="form-control" value="{{ current_user.email }}" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Keys & Engine Configuration -->
+    <div class="card-custom mb-4">
+      <div class="card-custom-header">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-cpu text-primary me-2"></i> AI & Web Research Integrations</h5>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Engine Config</span>
+      </div>
+      <div class="card-custom-body p-4">
+        <form method="POST" action="{{ url_for('view_settings') }}">
+          <!-- Groq API Key -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label fw-semibold mb-0">Groq API Key</label>
+              <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" id="testGroqBtn">
+                <i class="bi bi-plug me-1"></i> Test Connection
+              </button>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-key-fill"></i></span>
+              <input type="password" name="groq_api_key" id="groqInput" class="form-control font-monospace" 
+                     placeholder="gsk_..." value="{% if groq_key_set %}••••••••••••••••••••••••{% endif %}">
+              <button class="btn btn-outline-secondary" type="button" id="toggleGroqVisibility" title="Show / Hide Key">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="text-muted fs-7">
+                Get a free ultra-fast LLM API key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com</a>
+              </span>
+              <span id="groqTestResult" class="fs-7 fw-semibold"></span>
+            </div>
+          </div>
+
+          <!-- Tavily API Key -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label fw-semibold mb-0">Tavily Search API Key</label>
+              <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" id="testTavilyBtn">
+                <i class="bi bi-plug me-1"></i> Test Connection
+              </button>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-globe2"></i></span>
+              <input type="password" name="tavily_api_key" id="tavilyInput" class="form-control font-monospace" 
+                     placeholder="tvly-..." value="{% if tavily_key_set %}••••••••••••••••••••••••{% endif %}">
+              <button class="btn btn-outline-secondary" type="button" id="toggleTavilyVisibility" title="Show / Hide Key">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="text-muted fs-7">
+                Get 1,000 free web search queries at <a href="https://tavily.com" target="_blank" rel="noopener">tavily.com</a>
+              </span>
+              <span id="tavilyTestResult" class="fs-7 fw-semibold"></span>
+            </div>
+          </div>
+
+          <!-- Groq Model Selector -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Active LLM Model</label>
+            <select name="groq_model" class="form-select">
+              {% for m in models %}
+                <option value="{{ m.id }}" {% if m.id == current_model %}selected{% endif %}>
+                  {{ m.name }}
+                </option>
+              {% endfor %}
+            </select>
+            <span class="text-muted fs-7 mt-1 d-block">
+              <strong>Llama 3.3 70B Versatile</strong> is strongly recommended for high-accuracy strategic synthesis.
+            </span>
+          </div>
+
+          <!-- Demo Mode Switch -->
+          <div class="p-3 bg-light rounded-3 border mb-4">
+            <div class="form-check form-switch mb-1">
+              <input class="form-check-input" type="checkbox" name="demo_mode" id="demoModeSwitch" {% if demo_mode %}checked{% endif %}>
+              <label class="form-check-label fw-bold text-navy" for="demoModeSwitch">
+                Force Demo Simulation Mode
+              </label>
+            </div>
+            <p class="text-muted fs-7 mb-0 ps-4">
+              When enabled or when external API keys are unavailable, the application uses calibrated offline market intelligence and explicitly tags all results as <strong>DEMO DATA</strong>. No simulated results will ever be falsely represented as live web research.
+            </p>
+          </div>
+
+          <button type="submit" class="btn btn-primary-custom px-4 py-2">
+            <i class="bi bi-save me-1"></i> Save Configuration
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Password Visibility Toggles
+    const togglePassword = (btnId, inputId) => {
+        const btn = document.getElementById(btnId);
+        const input = document.getElementById(inputId);
+        if (btn && input) {
+            btn.addEventListener("click", () => {
+                const isPassword = input.getAttribute("type") === "password";
+                input.setAttribute("type", isPassword ? "text" : "password");
+                btn.innerHTML = isPassword ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+            });
+        }
+    };
+
+    togglePassword("toggleGroqVisibility", "groqInput");
+    togglePassword("toggleTavilyVisibility", "tavilyInput");
+
+    // 2. Test Groq Connection
+    const testGroqBtn = document.getElementById("testGroqBtn");
+    const groqResult = document.getElementById("groqTestResult");
+    if (testGroqBtn && groqResult) {
+        testGroqBtn.addEventListener("click", async () => {
+            groqResult.className = "fs-7 text-muted";
+            groqResult.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Testing Groq API...';
+            try {
+                const res = await fetch("/api/settings/test-groq");
+                const data = await res.json();
+                if (data.success) {
+                    groqResult.className = "fs-7 text-success";
+                    groqResult.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ' + (data.message || 'Connected successfully!');
+                } else {
+                    groqResult.className = "fs-7 text-danger";
+                    groqResult.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i> ' + (data.message || 'Connection failed.');
+                }
+            } catch (e) {
+                groqResult.className = "fs-7 text-danger";
+                groqResult.innerHTML = 'Error testing Groq API';
+            }
+        });
+    }
+
+    // 3. Test Tavily Connection
+    const testTavilyBtn = document.getElementById("testTavilyBtn");
+    const tavilyResult = document.getElementById("tavilyTestResult");
+    if (testTavilyBtn && tavilyResult) {
+        testTavilyBtn.addEventListener("click", async () => {
+            tavilyResult.className = "fs-7 text-muted";
+            tavilyResult.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Testing Tavily API...';
+            try {
+                const res = await fetch("/api/settings/test-tavily");
+                const data = await res.json();
+                if (data.success) {
+                    tavilyResult.className = "fs-7 text-success";
+                    tavilyResult.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ' + (data.message || 'Connected successfully!');
+                } else {
+                    tavilyResult.className = "fs-7 text-danger";
+                    tavilyResult.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i> ' + (data.message || 'Connection failed.');
+                }
+            } catch (e) {
+                tavilyResult.className = "fs-7 text-danger";
+                tavilyResult.innerHTML = 'Error testing Tavily API';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

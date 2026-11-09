@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}SWOT Strategic Matrix — {{ idea.title }}{% endblock %}
+
+{% block content %}
+{% include 'partials/idea_header.html' %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">SWOT Strategic Analysis</h4>
+    <p class="text-muted mb-0">Internal strengths and vulnerabilities mapped against external macroeconomic opportunities and competitive threats.</p>
+  </div>
+</div>
+
+<!-- 2x2 SWOT Grid -->
+<div class="swot-grid mb-4">
+  <!-- Strengths -->
+  <div class="swot-card swot-strengths">
+    <div class="swot-title">
+      <i class="bi bi-shield-fill-check fs-4"></i>
+      <span>STRENGTHS (Internal Positives)</span>
+    </div>
+    <p class="text-muted small mb-3">Core internal capabilities, architectural advantages, and proprietary assets.</p>
+    <ul class="swot-list">
+      {% for s in swot.strengths or ['High development agility without legacy architectural baggage', 'Domain-specific automated AI workflow', 'Lower cost structure enabling accessible pricing'] %}
+        <li><strong>{{ s }}</strong></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Weaknesses -->
+  <div class="swot-card swot-weaknesses">
+    <div class="swot-title">
+      <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+      <span>WEAKNESSES (Internal Vulnerabilities)</span>
+    </div>
+    <p class="text-muted small mb-3">Internal resource constraints, early operational gaps, and cold-start limitations.</p>
+    <ul class="swot-list">
+      {% for w in swot.weaknesses or ['Zero brand recognition in target enterprise market', 'Cold-start data telemetry bottleneck', 'Limited early operating capital reserves'] %}
+        <li><strong>{{ w }}</strong></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Opportunities -->
+  <div class="swot-card swot-opportunities">
+    <div class="swot-title">
+      <i class="bi bi-lightning-charge-fill fs-4"></i>
+      <span>OPPORTUNITIES (External Positives)</span>
+    </div>
+    <p class="text-muted small mb-3">Macro market growth drivers, unserved customer niches, and technological shifts.</p>
+    <ul class="swot-list">
+      {% for o in swot.opportunities or ['Double-digit annual CAGR expansion across target sector', 'Unbundling of bloated legacy enterprise software suites', 'Fast partner integration ecosystem via open REST APIs'] %}
+        <li><strong>{{ o }}</strong></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Threats -->
+  <div class="swot-card swot-threats">
+    <div class="swot-title">
+      <i class="bi bi-shield-slash-fill fs-4"></i>
+      <span>THREATS (External Risks)</span>
+    </div>
+    <p class="text-muted small mb-3">Incumbent counter-moves, customer acquisition inflation, and regulatory shifts.</p>
+    <ul class="swot-list">
+      {% for t in swot.threats or ['Incumbents adding basic automated copilot features', 'Rising paid customer acquisition costs on major ad platforms', 'Evolving data privacy regulations and security audits'] %}
+        <li><strong>{{ t }}</strong></li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<!-- Tactical SWOT Action Plan -->
+<div class="card-custom">
+  <div class="card-custom-header">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-lightbulb-fill text-warning me-2"></i> Strategic Cross-Matrix Playbook</h5>
+    <span class="badge bg-light text-muted border">Action Items</span>
+  </div>
+  <div class="card-custom-body">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="p-3 bg-light rounded-3 border h-100">
+          <h6 class="fw-bold text-navy mb-2"><i class="bi bi-arrow-up-right-circle-fill text-success me-2"></i> Strengths-Opportunities (S-O) Offensive Strategy</h6>
+          <p class="text-muted small mb-0">Leverage your lean, agile deployment speed to capture the mid-market and SMB buyers ignored by heavy incumbents before they can react.</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="p-3 bg-light rounded-3 border h-100">
+          <h6 class="fw-bold text-navy mb-2"><i class="bi bi-shield-lock-fill text-primary me-2"></i> Weaknesses-Threats (W-T) Defensive Strategy</h6>
+          <p class="text-muted small mb-0">Counter low brand recognition by publishing transparent, verifiable ROI case studies and offering frictionless trials to establish instant social proof.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
